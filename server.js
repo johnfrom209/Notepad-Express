@@ -17,15 +17,13 @@ app.get('/notes', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/notes.html'))
 }
 );
-// loads the notes to the page
 app.get('/api/notes', (req, res) => {
     res.json(textSaved);
 })
 
 // saves the notes
 app.post('/api/notes', (req, res) => {
-    // Log that a POST request was received
-    console.info(`${req.method} request received to add a note`);
+
     // Destructuring assignment for the items in req.body
     const { title, text } = req.body;
 
@@ -33,7 +31,7 @@ app.post('/api/notes', (req, res) => {
         const newNote = {
             title,
             text,
-            uniqid_id: uniqid(),
+            id: uniqid(),
         };
 
         fs.readFile('./db/db.json', 'utf8', (err, data) => {
@@ -57,10 +55,40 @@ app.post('/api/notes', (req, res) => {
             }
         }
         )
-        // refesh page 
-        res.redirect('back');
+        res.redirect('back')
     }
+})
 
+app.delete('/api/notes/:id', (req, res) => {
+
+    let currentId = req.params.id;
+
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+        }
+        else {
+            const parsedSaved = JSON.parse(data);
+
+            for (let i = 0; i < parsedSaved.length; i++) {
+                if (currentId == parsedSaved[i].id) {
+                    parsedSaved.splice(i, 1);
+                }
+            }
+            textSaved = parsedSaved;
+
+            fs.writeFile(
+                './db/db.json',
+                JSON.stringify(parsedSaved),
+                (writeErr) =>
+                    writeErr
+                        ? console.error(writeErr)
+                        : console.info('Successfully deleted!')
+            );
+        }
+        res.redirect('back')
+    }
+    )
 })
 
 app.get(`*`, (req, res) =>
