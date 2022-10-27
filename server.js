@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const uniqid = require('uniqid');
 let textSaved = require('./db/db.json');
-const PORT = 3001;
+const PORT = process.env.port || 3001;
 
 const app = express();
 
@@ -53,9 +53,9 @@ app.post('/api/notes', (req, res) => {
                             : console.info('Successfully added note!')
                 );
             }
+            res.json(textSaved);
         }
         )
-        res.redirect('back')
     }
 })
 
@@ -86,7 +86,7 @@ app.delete('/api/notes/:id', (req, res) => {
                         : console.info('Successfully deleted!')
             );
         }
-        res.redirect('back')
+        res.json(textSaved);
     }
     )
 })
